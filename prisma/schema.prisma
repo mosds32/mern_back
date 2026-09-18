@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model otp {
+  otp_id         Int       @id @default(autoincrement())
+  otp_number     Int?
+  otp_createdat  DateTime? @db.DateTime(0)
+  otp_modifiedat DateTime? @db.DateTime(0)
+  otp_deletedat  DateTime? @db.DateTime(0)
+  user_user_id   Int
+  user           user      @relation(fields: [user_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_otp_user")
+
+  @@index([user_user_id], map: "fk_otp_user_idx")
+}
+
+model user {
+  user_id         Int            @id @default(autoincrement())
+  user_name       String?        @db.VarChar(485)
+  user_email      String?        @db.VarChar(465)
+  user_password   String?        @db.LongText
+  user_isverify   Int?
+  user_gender     String?        @db.VarChar(45)
+  user_phone      String?        @db.VarChar(455)
+  user_address    String?        @db.LongText
+  user_age        String?        @db.VarChar(45)
+  user_blood      String?        @db.VarChar(445)
+  user_allergies  String?        @db.VarChar(465)
+  user_emergency  String?        @db.VarChar(845)
+  user_issocial   Int?
+  user_createdat  DateTime?      @db.DateTime(0)
+  user_modifiedat DateTime?      @db.DateTime(0)
+  user_deletedat  DateTime?      @db.DateTime(0)
+  appointment     appointment[]
+  conversation    conversation[]
+  loginstatus     loginstatus[]
+  otp             otp[]
+}
+
+model loginstatus {
+  loginstatus_id         Int       @id @default(autoincrement())
+  loginstatus_isactive   Int?
+  loginstatus_createdat  DateTime? @db.DateTime(0)
+  loginstatus_modifiedat DateTime? @db.DateTime(0)
+  loginstatus_deletedat  DateTime? @db.DateTime(0)
+  user_user_id           Int
+  user                   user      @relation(fields: [user_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_loginstatus_user1")
+
+  @@index([user_user_id], map: "fk_loginstatus_user1_idx")
+}
+
+model doctors {
+  doctors_id                Int            @id @default(autoincrement())
+  doctors_full_name         String?        @db.VarChar(495)
+  doctors_intials           String?        @db.VarChar(495)
+  doctors_rating            Int?
+  doctors_review_count      Int?
+  doctors_years_experience  Int?
+  doctors_next_available_at DateTime?      @db.DateTime(0)
+  doctors_pic_url           String?        @db.LongText
+  doctors_isactive          Int?           @db.TinyInt
+  doctors_createdtat        DateTime?      @db.DateTime(0)
+  doctors_deletedat         DateTime?      @db.DateTime(0)
+  doctors_modifiedat        DateTime?      @db.DateTime(0)
+  speciality_speciality_id  Int
+  appointment               appointment[]
+  conversation              conversation[]
+  speciality                speciality     @relation(fields: [speciality_speciality_id], references: [speciality_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_doctors_speciality1")
+
+  @@index([speciality_speciality_id], map: "fk_doctors_speciality1_idx")
+}
+
+model speciality {
+  speciality_id   Int       @id @default(autoincrement())
+  speciality_type String?   @db.VarChar(475)
+  doctors         doctors[]
+}
+
+model appointment {
+  appointment_id         Int       @id @default(autoincrement())
+  appointment_date       DateTime? @db.Date
+  appointment_time       DateTime? @db.Time(0)
+  appointment_reason     String?   @db.LongText
+  appointment_status     String?   @db.VarChar(45)
+  appointment_createdat  DateTime? @db.DateTime(0)
+  appointment_modifiedat DateTime? @db.DateTime(0)
+  appointment_deletedat  DateTime? @db.DateTime(0)
+  user_user_id           Int
+  doctors_doctors_id     Int
+  doctors                doctors   @relation(fields: [doctors_doctors_id], references: [doctors_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_appointment_doctors1")
+  user                   user      @relation(fields: [user_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_appointment_user1")
+
+  @@index([doctors_doctors_id], map: "fk_appointment_doctors1_idx")
+  @@index([user_user_id], map: "fk_appointment_user1_idx")
+}
+
+model conversation {
+  conversation_id         Int       @id @default(autoincrement())
+  conversation_type       String?   @db.VarChar(485)
+  conversation_createdat  DateTime? @db.DateTime(0)
+  conversation_modifiedat DateTime? @db.DateTime(0)
+  conversation_deletedat  DateTime? @db.DateTime(0)
+  user_user_id            Int
+  doctors_doctors_id      Int
+  doctors                 doctors   @relation(fields: [doctors_doctors_id], references: [doctors_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_conversation_doctors1")
+  user                    user      @relation(fields: [user_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_conversation_user1")
+  message                 message[]
+
+  @@index([doctors_doctors_id], map: "fk_conversation_doctors1_idx")
+  @@index([user_user_id], map: "fk_conversation_user1_idx")
+}
+
+model message {
+  message_id                   Int          @id @default(autoincrement())
+  message_text                 String?      @db.LongText
+  message_sender_type          String?      @db.VarChar(485)
+  message_is_read              Int?         @db.TinyInt
+  message_createdat            DateTime?    @db.DateTime(0)
+  message_modifiedat           DateTime?    @db.DateTime(0)
+  message_deletedat            DateTime?    @db.DateTime(0)
+  conversation_conversation_id Int
+  conversation                 conversation @relation(fields: [conversation_conversation_id], references: [conversation_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_message_conversation1")
+
+  @@index([conversation_conversation_id], map: "fk_message_conversation1_idx")
+}
