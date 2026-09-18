@@ -39,4 +39,4 @@ app.use("/api/v1/messages", messageRouter);
 app.use("/api/v1/appointments", appointmentRouter);
 app.use("/api/v1/auth", authrouter);
 app.use("/api/v1/doctors", doctorrouter);
-export { app };
+export default app;
